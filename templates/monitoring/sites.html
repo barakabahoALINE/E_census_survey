@@ -1,0 +1,9 @@
+{% extends "monitoring/base.html" %}
+{% block title %}Districts / Sites | Exam Submission Monitoring{% endblock %}
+{% block content %}
+<div class="mb-4"><h1 class="h3">Districts / Sites</h1><p class="text-muted mb-0">Operational submission progress by exam location.</p></div>
+<section class="card border-0 shadow-sm"><div class="card-body"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+<thead><tr><th>District / Site</th><th class="text-end">Expected</th><th class="text-end">Submitted</th><th class="text-end">Not submitted</th><th class="text-end">Progress</th><th>Status</th></tr></thead>
+<tbody>{% for row in districts %}<tr role="button" onclick="window.location='{% url 'monitoring:district_detail' row.district %}'"><td class="fw-medium">{{ row.district }}</td><td class="text-end">{{ row.expected_count }}</td><td class="text-end text-success">{{ row.submitted_count }}</td><td class="text-end text-danger">{{ row.not_submitted_count }}</td><td class="text-end">{{ row.submission_percentage|floatformat:1 }}%</td><td>{% if row.status == 'Complete' %}<span class="badge text-bg-success">Complete</span>{% else %}<span class="badge text-bg-warning">Pending</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted">No districts available.</td></tr>{% endfor %}</tbody>
+</table></div></div></section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "monitoring/base.html" %}
+{% block title %}Dashboard | Exam Submission Monitoring{% endblock %}
+{% block content %}
+<div class="mb-4"><h1 class="h3">Candidate submission overview</h1><p class="text-muted mb-0">Expected candidates compared with available exam submissions.</p></div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Expected candidates</div><div class="display-6">{{ total_expected }}</div></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Submitted</div><div class="display-6 text-success">{{ total_submitted }}</div></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Not submitted</div><div class="display-6 text-danger">{{ total_not_submitted }}</div></div></div></div>
+</div>
+<section class="card border-0 shadow-sm"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">District summary</h2><a class="btn btn-sm btn-outline-primary" href="{% url 'monitoring:sites' %}">View all sites</a></div>
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>District</th><th class="text-end">Expected</th><th class="text-end">Submitted</th><th class="text-end">Not submitted</th><th class="text-end">Progress</th></tr></thead>
+        <tbody>{% for row in districts %}<tr><td class="fw-medium"><a href="{% url 'monitoring:district_detail' row.district %}">{{ row.district }}</a></td><td class="text-end">{{ row.expected_count }}</td><td class="text-end text-success">{{ row.submitted_count }}</td><td class="text-end text-danger">{{ row.not_submitted_count }}</td><td class="text-end">{{ row.submission_percentage|floatformat:1 }}%</td></tr>{% empty %}<tr><td colspan="5" class="text-muted">No candidates have been imported yet.</td></tr>{% endfor %}</tbody>
+    </table></div>
+</div></section>
+{% endblock %}

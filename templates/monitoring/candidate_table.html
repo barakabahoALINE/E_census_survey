@@ -1,0 +1,25 @@
+<div class="table-responsive">
+    <table class="table status-table table-hover align-middle mb-0">
+        <thead><tr><th>Candidate</th><th>National ID</th><th>District / Site</th><th>Registered location</th><th>Status</th><th>Score</th><th>Submitted at</th></tr></thead>
+        <tbody>
+        {% for candidate in page_obj %}
+            <tr>
+                <td data-label="Candidate" class="fw-medium">{{ candidate.full_name }}</td>
+                <td data-label="National ID">{{ candidate.national_id }}</td>
+                <td data-label="District / Site">{{ candidate.district }}</td>
+                <td data-label="Registered location">{{ candidate.registered_location|default:"-" }}</td>
+                <td data-label="Status">{% if candidate.has_submission %}<span class="badge text-bg-success">Submitted</span>{% else %}<span class="badge text-bg-danger">Not Submitted</span>{% endif %}</td>
+                <td data-label="Score">{% if candidate.has_submission %}{{ candidate.submission_score|default_if_none:"-" }}{% else %}-{% endif %}</td>
+                <td data-label="Submitted at">{% if candidate.has_submission %}{{ candidate.submission_submitted_at|date:"Y-m-d H:i"|default:"-" }}{% else %}-{% endif %}</td>
+            </tr>
+        {% empty %}<tr><td colspan="7" class="text-muted py-4">No candidates match the selected filters.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-3" aria-label="Candidate pages"><ul class="pagination pagination-sm mb-0">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if status and status != 'all' %}&status={{ status }}{% endif %}{% if district %}&district={{ district|urlencode }}{% endif %}">Previous</a></li>{% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if status and status != 'all' %}&status={{ status }}{% endif %}{% if district %}&district={{ district|urlencode }}{% endif %}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}

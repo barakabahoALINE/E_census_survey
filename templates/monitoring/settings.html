@@ -1,0 +1,6 @@
+{% extends "monitoring/base.html" %}
+{% block title %}Settings | Exam Submission Monitoring{% endblock %}
+{% block content %}
+<div class="mb-4"><h1 class="h3">Settings</h1><p class="text-muted mb-0">Account and monitoring system information.</p></div>
+<section class="card border-0 shadow-sm" style="max-width: 680px;"><div class="card-body"><h2 class="h5">Signed-in staff account</h2><dl class="row mb-0"><dt class="col-sm-4">Username</dt><dd class="col-sm-8">{{ request.user.username }}</dd><dt class="col-sm-4">Name</dt><dd class="col-sm-8">{{ request.user.get_full_name|default:"-" }}</dd><dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ request.user.email|default:"-" }}</dd></dl></div></section>
+{% endblock %}
