@@ -9,7 +9,7 @@ from .services.reports import build_csv_response, build_report_context
 
 class DashboardSummaryTests(TestCase):
     def setUp(self):
-        get_user_model().objects.create_user(username="staff", password="Strong-password-123", is_staff=True)
+        get_user_model().objects.create_user(email="staff@example.com", password="Strong-password-123", is_staff=True)
         Candidate.objects.create(national_id="1199000000000001", full_name="Gasabo Submitted", district="Gasabo", registered_location="Site A")
         Candidate.objects.create(national_id="1199000000000002", full_name="Gasabo Waiting", district="Gasabo", registered_location="Site A")
         Candidate.objects.create(national_id="1199000000000003", full_name="Huye Complete", district="Huye", registered_location="Site B")
@@ -53,7 +53,7 @@ class DashboardSummaryTests(TestCase):
         self.assertEqual(summary["status"], "Complete")
 
     def test_monitoring_pages_are_protected_and_filterable(self):
-        self.client.login(username="staff", password="Strong-password-123")
+        self.client.login(email="staff@example.com", password="Strong-password-123")
 
         self.assertEqual(self.client.get("/sites/").status_code, 200)
         response = self.client.get("/sites/Gasabo/", {"status": "not_submitted", "search": "1199000000000002"})
@@ -74,11 +74,12 @@ class DashboardSummaryTests(TestCase):
         self.assertRedirects(response, "/accounts/login/?next=/")
 
     def test_logged_in_staff_can_view_dashboard(self):
-        self.client.login(username="staff", password="Strong-password-123")
+        self.client.login(email="staff@example.com", password="Strong-password-123")
 
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "staff@example.com")
 
     def test_report_summary_counts_and_percentage_are_consistent(self):
         report = build_report_context()
@@ -108,7 +109,7 @@ class DashboardSummaryTests(TestCase):
         self.assertNotIn("Gasabo Submitted", csv_text)
         self.assertNotIn("Huye Complete", csv_text)
 
-        self.client.login(username="staff", password="Strong-password-123")
+        self.client.login(email="staff@example.com", password="Strong-password-123")
         response = self.client.get("/reports/export.csv", {"district": "Gasabo", "status": "not_submitted"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")

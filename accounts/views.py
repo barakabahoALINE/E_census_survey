@@ -1,12 +1,12 @@
-from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render
 
-from .services.authentication import StaffSignupForm, create_staff_user
+from .services.authentication import EmailLoginForm, StaffSignupForm
 
 
 class StaffLoginView(LoginView):
     template_name = "accounts/login.html"
+    authentication_form = EmailLoginForm
     redirect_authenticated_user = True
 
 
@@ -19,7 +19,6 @@ def signup(request):
         return redirect("monitoring:dashboard")
     form = StaffSignupForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = create_staff_user(form)
-        login(request, user)
-        return redirect("monitoring:dashboard")
+        form.save()
+        return redirect("accounts:login")
     return render(request, "accounts/signup.html", {"form": form})
