@@ -1,14 +1,14 @@
 import os
 from pathlib import Path
-
+from decouple import config
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "development-only-change-me")
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes"}
-ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver").split(",") if host.strip()]
+SECRET_KEY = config("DJANGO_SECRET_KEY", default="development-only-change-me")
+DEBUG = config("DJANGO_DEBUG", default="True").lower() in {"1", "true", "yes"}
+ALLOWED_HOSTS = [host.strip() for host in config("DJANGO_ALLOWED_HOSTS", default="127.0.0.1,localhost,testserver").split(",") if host.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -51,14 +51,14 @@ ASGI_APPLICATION = "census_monitor.asgi.application"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    }
-}
+          'ENGINE': 'django.db.backends.mysql',
+          'NAME': config('DB_NAME'),
+          'USER': config('DB_USER'),
+          'PASSWORD': config('DB_PASSWORD'),
+          'HOST': config('DB_HOST'),
+          'PORT': config('DB_PORT'),
+         }
+ }
 
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = "en-us"

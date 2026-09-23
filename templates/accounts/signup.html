@@ -1,18 +1,600 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Staff signup</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<main class="container py-5" style="max-width: 520px">
-    <div class="card border-0 shadow-sm"><div class="card-body p-4">
-        <h1 class="h3 mb-4">Create staff account</h1>
-        <form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary w-100" type="submit">Sign up</button></form>
-        <p class="mt-3 mb-0 text-center">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
-    </div></div>
-</main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create your staff account</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --surface: rgba(255, 255, 255, 0.96);
+        --surface-strong: #ffffff;
+        --primary: #2d5aa8;
+        --primary-dark: #1f467f;
+        --primary-soft: rgba(45, 90, 168, 0.12);
+        --focus-ring: rgba(45, 90, 168, 0.18);
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --success: #16a34a;
+        --success-soft: rgba(22, 163, 74, 0.1);
+        --error: #dc2626;
+        --error-soft: rgba(220, 38, 38, 0.08);
+        --shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        color: var(--text);
+      }
+
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 28px 18px;
+      }
+
+      .auth-shell {
+        width: min(100%, 760px);
+      }
+
+      .auth-card {
+        background: var(--surface);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        backdrop-filter: blur(6px);
+      }
+
+      .auth-body {
+        padding: 18px 28px 20px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        box-shadow: 0 8px 18px rgba(45, 90, 168, 0.28);
+        font-size: 0.88rem;
+        font-weight: 800;
+      }
+
+      .auth-header {
+        margin-bottom: 18px;
+      }
+
+      .auth-header h1 {
+        margin: 0 0 6px;
+        font-size: clamp(1.9rem, 2.2vw, 2.2rem);
+        line-height: 1.18;
+        letter-spacing: -0.04em;
+        font-weight: 800;
+      }
+
+      .auth-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .form-layout {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 14px;
+      }
+
+      .field-full {
+        grid-column: 1 / -1;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-label {
+        font-size: 0.83rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .input-wrap input {
+        width: 100%;
+        height: 46px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font: inherit;
+        color: var(--text);
+        transition: all 0.18s ease;
+        outline: none;
+      }
+
+      .input-wrap input::placeholder {
+        color: #94a3b8;
+      }
+
+      .input-wrap input:focus,
+      .input-wrap:focus-within input {
+        border-color: rgba(45, 90, 168, 0.72);
+        box-shadow: 0 0 0 4px rgba(45, 90, 168, 0.12);
+        background: #fff;
+      }
+
+      .input-wrap input.is-invalid {
+        border-color: rgba(220, 38, 38, 0.6);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+      }
+
+      .input-wrap input.is-valid {
+        border-color: rgba(22, 163, 74, 0.6);
+        box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.08);
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+
+      .toggle-password:hover {
+        background: rgba(45, 90, 168, 0.08);
+        color: var(--primary);
+      }
+
+      .toggle-password svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+      }
+
+      .helptext {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .errorlist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        color: var(--error);
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+
+      .errorlist li + li {
+        margin-top: 4px;
+      }
+
+      .password-rules {
+        margin-top: 2px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(248, 250, 252, 0.9);
+      }
+
+      .password-rules strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.78rem;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+      }
+
+      .password-rules ul {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 4px;
+        list-style: disc;
+      }
+
+      .password-rules li {
+        color: var(--muted);
+        font-size: 0.78rem;
+        transition: color 0.18s ease;
+      }
+
+      .password-rules li.valid {
+        color: var(--success);
+        list-style: none;
+        padding-left: 0;
+        position: relative;
+      }
+
+      .password-rules li.valid::before {
+        content: "✓";
+        position: absolute;
+        left: -18px;
+        color: var(--success);
+        font-weight: 700;
+      }
+
+      .submit-btn {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        height: 48px;
+        cursor: pointer;
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          opacity 0.18s ease;
+        box-shadow: 0 12px 26px rgba(45, 90, 168, 0.28);
+        margin-top: 8px;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(45, 90, 168, 0.32);
+      }
+
+      .submit-btn:active {
+        transform: translateY(0);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .auth-footer {
+        margin-top: 16px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      .auth-footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 640px) {
+        .form-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .auth-body {
+          padding: 20px 18px 18px;
+        }
+      }
+
+      @media (max-height: 760px) {
+        .auth-body {
+          padding-top: 14px;
+          padding-bottom: 16px;
+        }
+
+        .auth-header {
+          margin-bottom: 14px;
+        }
+
+        .form-layout {
+          gap: 10px 12px;
+        }
+
+        .password-rules {
+          padding: 8px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="auth-card" aria-label="Create staff account form">
+        <div class="auth-body">
+          <div class="brand">
+            <div class="brand-mark">E</div>
+            <span>E-Census</span>
+          </div>
+
+          <div class="auth-header">
+            <h1>Create your staff account</h1>
+            <p>Set up your account to access the staff portal.</p>
+          </div>
+
+          {% if form.non_field_errors %}
+          <div
+            class="alert"
+            style="
+              margin-bottom: 18px;
+              padding: 12px 14px;
+              border-radius: 12px;
+              background: var(--error-soft);
+              color: var(--error);
+              border: 1px solid rgba(220, 38, 38, 0.12);
+              font-size: 0.92rem;
+            "
+          >
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-layout">
+              <div class="form-group field-full">
+                <label class="form-label" for="{{ form.username.id_for_label }}"
+                  >Username</label
+                >
+                <div class="input-wrap">{{ form.username }}</div>
+                {% if form.username.help_text %}
+                <p class="helptext">{{ form.username.help_text }}</p>
+                {% endif %} {% if form.username.errors %}
+                <ul class="errorlist">
+                  {% for error in form.username.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label
+                  class="form-label"
+                  for="{{ form.first_name.id_for_label }}"
+                  >First name</label
+                >
+                <div class="input-wrap">{{ form.first_name }}</div>
+                {% if form.first_name.errors %}
+                <ul class="errorlist">
+                  {% for error in form.first_name.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label
+                  class="form-label"
+                  for="{{ form.last_name.id_for_label }}"
+                  >Last name</label
+                >
+                <div class="input-wrap">{{ form.last_name }}</div>
+                {% if form.last_name.errors %}
+                <ul class="errorlist">
+                  {% for error in form.last_name.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group field-full">
+                <label class="form-label" for="{{ form.email.id_for_label }}"
+                  >Email address</label
+                >
+                <div class="input-wrap">{{ form.email }}</div>
+                {% if form.email.errors %}
+                <ul class="errorlist">
+                  {% for error in form.email.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label
+                  class="form-label"
+                  for="{{ form.password1.id_for_label }}"
+                  >Password</label
+                >
+                <div class="input-wrap">
+                  {{ form.password1 }}
+                  <button
+                    class="toggle-password"
+                    type="button"
+                    data-target="{{ form.password1.id_for_label }}"
+                    aria-label="Show password"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M1.5 12s3.5-6 10.5-6 10.5 6 10.5 6-3.5 6-10.5 6S1.5 12 1.5 12Z"
+                      ></path>
+                      <circle cx="12" cy="12" r="3.5"></circle>
+                    </svg>
+                  </button>
+                </div>
+                {% if form.password1.errors %}
+                <ul class="errorlist">
+                  {% for error in form.password1.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label
+                  class="form-label"
+                  for="{{ form.password2.id_for_label }}"
+                  >Confirm password</label
+                >
+                <div class="input-wrap">
+                  {{ form.password2 }}
+                  <button
+                    class="toggle-password"
+                    type="button"
+                    data-target="{{ form.password2.id_for_label }}"
+                    aria-label="Show password"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M1.5 12s3.5-6 10.5-6 10.5 6 10.5 6-3.5 6-10.5 6S1.5 12 1.5 12Z"
+                      ></path>
+                      <circle cx="12" cy="12" r="3.5"></circle>
+                    </svg>
+                  </button>
+                </div>
+                {% if form.password2.errors %}
+                <ul class="errorlist">
+                  {% for error in form.password2.errors %}
+                  <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+
+              <div class="field-full">
+                <div class="password-rules" aria-live="polite">
+                  <strong>Password requirements</strong>
+                  <ul>
+                    <li data-rule="length">At least 8 characters</li>
+                    <li data-rule="number">Contains a number</li>
+                    <li data-rule="special">Contains a special character</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <button class="submit-btn" type="submit">Create account</button>
+          </form>
+
+          <div class="auth-footer">
+            <span>Already have an account?</span>
+            <a href="{% url 'accounts:login' %}">Sign in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      document.querySelectorAll(".toggle-password").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const target = document.getElementById(this.dataset.target);
+          const isPassword = target.type === "password";
+          target.type = isPassword ? "text" : "password";
+          this.setAttribute(
+            "aria-label",
+            isPassword ? "Hide password" : "Show password",
+          );
+        });
+      });
+
+      const passwordInput = document.getElementById(
+        "{{ form.password1.id_for_label }}",
+      );
+      const passwordMatch = document.getElementById(
+        "{{ form.password2.id_for_label }}",
+      );
+
+      if (passwordInput) {
+        const ruleChecks = {
+          length: (value) => value.length >= 8,
+          number: (value) => /\d/.test(value),
+          special: (value) => /[^A-Za-z0-9]/.test(value),
+        };
+
+        passwordInput.addEventListener("input", function () {
+          const value = this.value;
+          Object.entries(ruleChecks).forEach(([key, validator]) => {
+            const item = document.querySelector('[data-rule="' + key + '"]');
+            if (item) {
+              const valid = validator(value);
+              item.classList.toggle("valid", valid);
+            }
+          });
+
+          if (passwordMatch && passwordMatch.value) {
+            const same = passwordMatch.value === value;
+            passwordMatch.classList.toggle(
+              "is-valid",
+              same && value.length > 0,
+            );
+            passwordMatch.classList.toggle(
+              "is-invalid",
+              !same && passwordMatch.value.length > 0,
+            );
+          }
+        });
+      }
+
+      if (passwordMatch) {
+        passwordMatch.addEventListener("input", function () {
+          const isMatch = this.value && this.value === passwordInput.value;
+          this.classList.toggle("is-valid", isMatch);
+          this.classList.toggle(
+            "is-invalid",
+            !isMatch && this.value.length > 0,
+          );
+        });
+      }
+    </script>
+  </body>
 </html>
