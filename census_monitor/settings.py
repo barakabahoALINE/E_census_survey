@@ -58,7 +58,15 @@ DATABASES = {
           'PASSWORD': config('DB_PASSWORD'),
           'HOST': config('DB_HOST'),
           'PORT': config('DB_PORT'),
-         }
+         },
+    "submissions_db": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": config("SUBMISSIONS_DB_NAME"),
+        "USER": config("SUBMISSIONS_DB_USER"),
+        "PASSWORD": config("SUBMISSIONS_DB_PASSWORD"),
+        "HOST": config("SUBMISSIONS_DB_HOST"),
+        "PORT": config("SUBMISSIONS_DB_PORT"),
+    },     
  }
 
 AUTH_PASSWORD_VALIDATORS = [

@@ -12,6 +12,6 @@ class CandidateAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ("national_id", "full_name", "district", "score", "submitted_location", "submitted_at")
-    list_filter = ("district", "submitted_location", "submitted_at")
+    list_display = ("national_id", "full_name", "district", "submitted_location")
+    list_filter = ("district", "submitted_location")
     search_fields = ("national_id", "full_name", "district")

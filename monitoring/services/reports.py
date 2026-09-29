@@ -38,8 +38,6 @@ def candidate_report_rows(candidates):
             candidate.district,
             candidate.registered_location or "-",
             "Submitted" if submitted else "Not Submitted",
-            candidate.submission_score if submitted and candidate.submission_score is not None else "-",
-            candidate.submission_submitted_at.strftime("%Y-%m-%d %H:%M") if submitted and candidate.submission_submitted_at else "-",
         ]
 
 
@@ -52,8 +50,6 @@ def build_csv_response(candidates):
         "District/Site",
         "Registered Location",
         "Submission Status",
-        "Score",
-        "Submitted At",
     ])
     writer.writerows(candidate_report_rows(candidates))
     return output.getvalue()

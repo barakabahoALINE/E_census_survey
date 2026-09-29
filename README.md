@@ -1,11 +1,13 @@
 # Establishment Census Exam Monitoring
 
-Foundational Django dashboard for comparing the official enumerator candidate list with exam submissions. The current submission source is intentionally temporary dummy data.
+Foundational Django dashboard for comparing the expected candidate list with real exam submissions.
 
 ## Architecture
 
 - `monitoring.models`: candidate/master-list and temporary submission records.
-- `monitoring.services.submissions`: submission retrieval boundary. Replace `DjangoSubmissionRepository` when an approved source is available.
+- `monitoring.services.submissions`: local submission retrieval boundary used by dashboard status calculations.
+- `monitoring.services.external_submissions`: read-only reader for `exam_rec`, joining `level-1.id_number` through `level-1-id`.
+- `monitoring.services.submission_sync`: idempotent matching and synchronization into the local `Submission` table.
 - `monitoring.services.dashboard`: matching and dashboard summary business logic using `national_id`.
 - `monitoring.services.candidate_import` and `monitoring.services.dummy_submissions`: data-loading business logic.
 - `accounts.services.authentication`: staff account creation logic.
@@ -13,9 +15,9 @@ Foundational Django dashboard for comparing the official enumerator candidate li
 
 The `accounts` app provides staff signup, login, and logout. The dashboard is protected and redirects unauthenticated users to login. New accounts are regular staff users, not administrators.
 
-The two files under `monitoring/management/commands` are intentionally thin Django adapters. Django requires that folder location to expose custom commands, but all actual command logic lives under `monitoring/services`.
+Management commands are thin Django adapters. Django requires their folder location to expose custom commands, while source reading and synchronization logic lives under `monitoring/services`.
 
-A candidate is submitted when the candidate `national_id` exists in the submission repository. Score does not determine submission status, so a score of zero is valid. There is no unknown-candidate workflow.
+A candidate is submitted when the candidate `national_id` exists in the local `Submission` table. Exam marks and exam-end time are not imported or used for status. Candidate district remains sourced from the expected candidate list.
 
 ## Setup
 
@@ -42,13 +44,23 @@ A candidate is submitted when the candidate `national_id` exists in the submissi
 
    Use `--dry-run` to inspect the import count without changing the database.
 
-7. Create dummy submissions:
+7. Configure the `SUBMISSIONS_DB_*` environment variables for read-only access to the external exam database. Do not run migrations against this database.
+
+8. Read and synchronize real submissions:
 
    ```powershell
-   python manage.py seed_dummy_submissions --replace
+   python manage.py sync_submissions
    ```
 
-8. Run focused tests and start the server:
+   Synchronization matches `level-1.id_number` to `Candidate.national_id`, updates local `Submission` records, and never writes to the external database. It is safe to repeat. To remove stale or dummy local rows so the local table exactly reflects current external matches, explicitly run:
+
+   ```powershell
+   python manage.py sync_submissions --prune-stale
+   ```
+
+   This option deletes unmatched rows only from the local `Submission` table; review the command summary before using it.
+
+9. Run focused tests and start the server:
 
    ```powershell
    python manage.py test
@@ -77,7 +89,7 @@ To test the main workflow manually:
 6. Open `Reports`, combine district/status/search filters, and confirm the summary and candidate table update together.
 7. Use `Export CSV` and confirm it contains only the filtered candidates; use `Print Report` to open the browser print dialog.
 
-Candidate lists use server-side pagination with 25 records per page. A candidate is submitted only when a matching `national_id` exists in submissions; score `0` remains a valid submitted result.
+Candidate lists use server-side pagination with 25 records per page. A candidate is submitted only when a matching `national_id` exists in the synchronized local submissions.
 
 ## Assumptions
 
@@ -87,4 +99,4 @@ Candidate lists use server-side pagination with 25 records per page. A candidate
 - `registered_location` is currently stored as `sector / cell`; submission location is stored separately for later validation.
 - The exam date is supplied during import because the workbook does not provide one consistent date field.
 
-CSWeb and the real exam database are not integrated yet.
+The exam database reader uses the `submissions_db` Django connection and only executes `SELECT` queries. External district codes are used for validation; the expected Candidate district is never overwritten.

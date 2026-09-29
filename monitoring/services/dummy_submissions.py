@@ -1,7 +1,4 @@
 import random
-from datetime import timedelta
-
-from django.utils import timezone
 
 from monitoring.models import Candidate, Submission
 
@@ -13,7 +10,6 @@ def seed_dummy_submissions(submitted_rate: float = 0.72, seed: int = 20260921, r
 
     randomizer = random.Random(seed)
     submitted = 0
-    now = timezone.now()
     for candidate in candidates:
         if randomizer.random() > submitted_rate:
             continue
@@ -23,8 +19,8 @@ def seed_dummy_submissions(submitted_rate: float = 0.72, seed: int = 20260921, r
                 "full_name": candidate.full_name,
                 "district": candidate.district,
                 "submitted_location": candidate.registered_location or candidate.district,
-                "score": randomizer.choice([0, 0, 35, 48, 62, 71, 84, 91]),
-                "submitted_at": now - timedelta(minutes=randomizer.randint(10, 420)),
+                "score": None,
+                "submitted_at": None,
             },
         )
         submitted += 1
