@@ -6,3 +6,4 @@ __pycache__/
 /staticfiles/
 media/
 .vscode/
+logs/submission-sync-*.log

@@ -36,7 +36,9 @@ def candidate_report_rows(candidates):
             candidate.full_name,
             candidate.national_id,
             candidate.district,
+            candidate.submission_district or "-",
             candidate.registered_location or "-",
+            candidate.submission_location or "-",
             "Submitted" if submitted else "Not Submitted",
         ]
 
@@ -47,8 +49,10 @@ def build_csv_response(candidates):
     writer.writerow([
         "Candidate Name",
         "National ID",
-        "District/Site",
-        "Registered Location",
+        "Expected District/Site",
+        "Submission District",
+        "Expected Registered Location",
+        "Submission Location",
         "Submission Status",
     ])
     writer.writerows(candidate_report_rows(candidates))

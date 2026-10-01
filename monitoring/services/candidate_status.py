@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Subquery
 
 from monitoring.models import Candidate, Submission
 
@@ -8,9 +8,15 @@ PAGE_SIZE = 25
 
 
 def candidate_status_queryset():
-    """Return candidates annotated with matching submission existence."""
+    """Return expected candidates annotated with their matching submission data."""
     matching_submissions = Submission.objects.filter(national_id=OuterRef("national_id"))
-    return Candidate.objects.annotate(has_submission=Exists(matching_submissions))
+    return Candidate.objects.annotate(
+        has_submission=Exists(matching_submissions),
+        submission_district=Subquery(matching_submissions.values("district")[:1]),
+        submission_location=Subquery(
+            matching_submissions.values("submitted_location")[:1]
+        ),
+    )
 
 
 def filter_candidates(queryset, *, district="", status="all", search=""):

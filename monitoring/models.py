@@ -27,7 +27,10 @@ class Candidate(models.Model):
 
 class Submission(models.Model):
     national_id = models.CharField(max_length=32, unique=True, db_index=True)
+    source_national_id = models.CharField(max_length=32, blank=True)
+    source_record_id = models.PositiveBigIntegerField(null=True, blank=True, db_index=True)
     full_name = models.CharField(max_length=255, blank=True)
+    phone_number = models.CharField(max_length=30, blank=True)
     district = models.CharField(max_length=100, blank=True, db_index=True)
     submitted_location = models.CharField(max_length=255, blank=True)
     score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)

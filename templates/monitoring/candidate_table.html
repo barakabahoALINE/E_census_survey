@@ -1,16 +1,18 @@
 <div class="table-responsive">
     <table class="table status-table table-hover align-middle mb-0">
-        <thead><tr><th>Candidate</th><th>National ID</th><th>District / Site</th><th>Registered location</th><th>Status</th></tr></thead>
+        <thead><tr><th>Candidate</th><th>National ID</th><th>Expected district / site</th><th>Submission district</th><th>Expected registered location</th><th>Submission location</th><th>Status</th></tr></thead>
         <tbody>
         {% for candidate in page_obj %}
             <tr>
                 <td data-label="Candidate" class="fw-medium">{{ candidate.full_name }}</td>
                 <td data-label="National ID">{{ candidate.national_id }}</td>
-                <td data-label="District / Site">{{ candidate.district }}</td>
-                <td data-label="Registered location">{{ candidate.registered_location|default:"-" }}</td>
+                <td data-label="Expected district / site">{{ candidate.district }}</td>
+                <td data-label="Submission district">{{ candidate.submission_district|default:"-" }}</td>
+                <td data-label="Expected registered location">{{ candidate.registered_location|default:"-" }}</td>
+                <td data-label="Submission location">{{ candidate.submission_location|default:"-" }}</td>
                 <td data-label="Status">{% if candidate.has_submission %}<span class="badge text-bg-success">Submitted</span>{% else %}<span class="badge text-bg-danger">Not Submitted</span>{% endif %}</td>
             </tr>
-        {% empty %}<tr><td colspan="5" class="text-muted py-4">No candidates match the selected filters.</td></tr>{% endfor %}
+        {% empty %}<tr><td colspan="7" class="text-muted py-4">No candidates match the selected filters.</td></tr>{% endfor %}
         </tbody>
     </table>
 </div>

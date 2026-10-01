@@ -2,6 +2,11 @@ from dataclasses import dataclass
 
 from django.db import connections
 
+from .administrative_locations import (
+    get_rwanda_location_resolver,
+    normalize_location_code,
+)
+
 
 DISTRICT_CODE_TO_NAME = {
     "11": "Nyarugenge",
@@ -41,6 +46,16 @@ DISTRICT_CODE_TO_NAME = {
 class ExternalSubmission:
     national_id: str | None
     district_code: str | None
+    full_name: str = ""
+    phone_number: str = ""
+    district: str = ""
+    sector: str = ""
+    cell: str = ""
+    record_id: int | None = None
+
+    @property
+    def location_resolved(self) -> bool:
+        return bool(self.district and self.sector and self.cell)
 
 
 class ExternalSubmissionReader:
@@ -54,22 +69,51 @@ class ExternalSubmissionReader:
         level_one_id = quote("level-1-id")
         id_number = quote("id_number")
         dist1 = quote("dist1")
+        names = quote("names")
+        phone_number = quote("phone_number")
+        sect1 = quote("sect1")
+        cell1 = quote("cell1")
+        exam_rec_id = quote("exam_rec-id")
 
         query = (
-            f"SELECT TRIM(level_one.{id_number}), exam_rec.{dist1} "
+            f"SELECT TRIM(level_one.{id_number}), exam_rec.{dist1}, "
+            f"exam_rec.{names}, exam_rec.{phone_number}, "
+            f"exam_rec.{sect1}, exam_rec.{cell1}, exam_rec.{exam_rec_id} "
             f"FROM {exam_rec} AS exam_rec "
             f"INNER JOIN {level_one} AS level_one "
             f"ON exam_rec.{level_one_id} = level_one.{level_one_id} "
+            f"ORDER BY exam_rec.{exam_rec_id} "
         )
 
         with connection.cursor() as cursor:
             cursor.execute(query)
             rows = cursor.fetchall()
 
-        return [
-            ExternalSubmission(
-                national_id=(str(national_id).strip() or None) if national_id is not None else None,
-                district_code=str(int(district_code)) if district_code is not None else None,
+        resolver = get_rwanda_location_resolver()
+        records = []
+        for (
+            national_id,
+            district_code,
+            full_name,
+            phone,
+            sector_code,
+            cell_code,
+            record_id,
+        ) in rows:
+            normalized_district_code = normalize_location_code(district_code) or None
+            location = resolver.resolve(district_code, sector_code, cell_code)
+            records.append(
+                ExternalSubmission(
+                    national_id=(str(national_id).strip() or None)
+                    if national_id is not None
+                    else None,
+                    district_code=normalized_district_code,
+                    full_name=str(full_name or "").strip(),
+                    phone_number=str(phone or "").strip(),
+                    district=location[0] if location else "",
+                    sector=location[1] if location else "",
+                    cell=location[2] if location else "",
+                    record_id=int(record_id) if record_id is not None else None,
+                )
             )
-            for national_id, district_code in rows
-        ]
+        return records
